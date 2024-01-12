@@ -55,25 +55,36 @@ func parseJSONToJSONQuote(json_data []byte) (JSONQuote, error) {
 	return quote, err
 }
 
-func parseJSONQuoteToQuote(quote JSONQuote, ticker string, period1 int64, period2 int64) (Quote, error) {
-	var q Quote
-	q.Ticker = ticker
-	q.PriceRangeStart = period1
-	q.PriceRangeEnd = period2
-	q.Interval = Interval(quote.Chart.Result[0].Meta.DataGranularity)
-	q.OpenPrice = quote.Chart.Result[0].Indicators.Quote[0].Open
-	q.LowPrice = quote.Chart.Result[0].Indicators.Quote[0].Low
-	q.HighPrice = quote.Chart.Result[0].Indicators.Quote[0].High
-	q.ClosePrice = quote.Chart.Result[0].Indicators.Quote[0].Close
-	q.Volume = quote.Chart.Result[0].Indicators.Quote[0].Volume
-	return q, nil
+func parseJSONQuoteToQuote(json_quote JSONQuote, ticker string, period1 int64, period2 int64) (Quote, error) {
+	var quote Quote
+	quote.Ticker = ticker
+	quote.PriceRangeStart = period1
+	quote.PriceRangeEnd = period2
+	quote.Interval = Interval(json_quote.Chart.Result[0].Meta.DataGranularity)
+	for i := 0; i < len(json_quote.Chart.Result[0].Timestamp); i++ {
+		var price_data PriceData
+		price_data.OpenPrice = json_quote.Chart.Result[0].Indicators.Quote[0].Open[i]
+		price_data.LowPrice = json_quote.Chart.Result[0].Indicators.Quote[0].Low[i]
+		price_data.HighPrice = json_quote.Chart.Result[0].Indicators.Quote[0].High[i]
+		price_data.ClosePrice = json_quote.Chart.Result[0].Indicators.Quote[0].Close[i]
+		price_data.Volume = json_quote.Chart.Result[0].Indicators.Quote[0].Volume[i]
+		quote.PriceHistoric = append(quote.PriceHistoric, price_data)
+	}
+	return quote, nil
 }
 
 // ---- Structs definitions ----
-// These  structs
-// are used to parse the JSON
-// response from Yahoo Finance
+// Structs are used to parse the
+// JSON data returned by the
+// Yahoo Finance API into
+// a more usable format
 
+// An auto-generated struct
+// from https://mholt.github.io/json-to-go/
+// It is used to serve as a middle-stage
+// between the JSON data returned by the
+// Yahoo Finance API and the Quote struct
+// defined below
 type JSONQuote struct {
 	Chart struct {
 		Result []struct {
@@ -137,27 +148,27 @@ type JSONQuote struct {
 	} `json:"chart"`
 }
 
-type CSVQuote struct {
-	Date     string  `csv:"Date"`
-	Open     float64 `csv:"Open"`
-	High     float64 `csv:"High"`
-	Low      float64 `csv:"Low"`
-	Close    float64 `csv:"Close"`
-	AdjClose float64 `csv:"Adj Close"`
-	Volume   int     `csv:"Volume"`
+// One interval of price data
+// for a ticker.
+// Contains OHLVC data
+type PriceData struct {
+	OpenPrice  float64
+	LowPrice   float64
+	HighPrice  float64
+	ClosePrice float64
+	Volume     int
 }
 
-// Our own custom struct for convenience
+// A single quote for a ticker
+// Contains the ticker, the
+// price range, the interval
+// and the price data
 type Quote struct {
 	Ticker          string
 	PriceRangeStart int64 // Unix timestamp of the start of the price range
 	PriceRangeEnd   int64 // Unix timestamp of the end of the price range
 	Interval        Interval
-	OpenPrice       []float64
-	LowPrice        []float64
-	HighPrice       []float64
-	ClosePrice      []float64
-	Volume          []int
+	PriceHistoric   []PriceData
 }
 
 // ---- Enum definitions ----

@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+// GetQuoteJSONString returns a JSON string from Yahoo Finance
+// If an error occurs, the JSON string will be empty
 func GetQuoteJSONString(ticker string, interval Interval, period Period) (string, error) {
 	req := fasthttp.AcquireRequest()
 	period1, period2 := getUnixTimestamps(period)
@@ -25,6 +27,9 @@ func GetQuoteJSONString(ticker string, interval Interval, period Period) (string
 	return string(resp.Body()), nil
 }
 
+// GetQuoteJSONStringBatch returns a slice of JSON strings from Yahoo Finance
+// The order of the slice is the same as the order of the tickers slice
+// If an error occurs, the JSON string will be empty
 func GetQuoteJSONStringBatch(tickers []string, interval Interval, period Period) ([]string, error) {
 	var wg sync.WaitGroup
 	var res []string
@@ -43,6 +48,8 @@ func GetQuoteJSONStringBatch(tickers []string, interval Interval, period Period)
 	return res, nil
 }
 
+// GetQuoteJSON returns a JSONQuote struct from Yahoo Finance
+// If an error occurs, the JSONQuote struct will be empty
 func GetQuoteJSON(ticker string, interval Interval, period Period) (JSONQuote, error) {
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -63,6 +70,9 @@ func GetQuoteJSON(ticker string, interval Interval, period Period) (JSONQuote, e
 	return parseJSONToJSONQuote(resp.Body())
 }
 
+// GetQuoteJSONBatch returns a slice of JSONQuote structs from Yahoo Finance
+// The order of the slice is the same as the order of the tickers slice
+// If an error occurs, the JSONQuote struct will be empty
 func GetQuoteJSONBatch(tickers []string, interval Interval, period Period) ([]JSONQuote, error) {
 	var wg sync.WaitGroup
 	var res []JSONQuote
@@ -81,6 +91,10 @@ func GetQuoteJSONBatch(tickers []string, interval Interval, period Period) ([]JS
 	return res, nil
 }
 
+// GetQuote returns a Quote struct from Yahoo Finance
+// If an error occurs, the Quote struct will be empty
+// This function is (surprisingly) around the same speed as GetQuoteJSON
+// and a tad faster than GetQuoteJSONString
 func GetQuote(ticker string, interval Interval, period Period) (Quote, error) {
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -106,6 +120,11 @@ func GetQuote(ticker string, interval Interval, period Period) (Quote, error) {
 	return parseJSONQuoteToQuote(json_quote, ticker, period1, period2)
 }
 
+// GetQuoteBatch returns a slice of Quote structs from Yahoo Finance
+// The order of the slice is the same as the order of the tickers slice
+// If an error occurs, the Quote struct will be empty
+// This function is (surprisingly) around the same speed as GetQuoteJSONBatch
+// and a tad faster than GetQuoteJSONStringBatch
 func GetQuoteBatch(tickers []string, interval Interval, period Period) ([]Quote, error) {
 	var wg sync.WaitGroup
 	var res []Quote
@@ -124,7 +143,9 @@ func GetQuoteBatch(tickers []string, interval Interval, period Period) ([]Quote,
 	return res, nil
 }
 
-func GetQuoteCSV(ticker string, interval Interval, period Period) (string, error) {
+// GetQuoteCSVString returns a CSV string with OHLVC data from Yahoo Finance
+// If an error occurs, the CSV string will be empty
+func GetQuoteCSVString(ticker string, interval Interval, period Period) (string, error) {
 	req := fasthttp.AcquireRequest()
 	period1, period2 := getUnixTimestamps(period)
 
@@ -143,14 +164,17 @@ func GetQuoteCSV(ticker string, interval Interval, period Period) (string, error
 	return string(resp.Body()), nil
 }
 
-func GetQuoteCSVBatch(tickers []string, interval Interval, period Period) ([]string, error) {
+// GetQuoteCSVStringBatch returns a slice of CSV strings with OHLVC data from Yahoo Finance
+// The order of the slice is the same as the order of the tickers slice
+// If an error occurs, the CSV string will be empty
+func GetQuoteCSVStringBatch(tickers []string, interval Interval, period Period) ([]string, error) {
 	var wg sync.WaitGroup
 	var res []string
 	for _, ticker := range tickers {
 		wg.Add(1)
 		go func(ticker string) {
 			defer wg.Done()
-			r, err := GetQuoteCSV(ticker, interval, period)
+			r, err := GetQuoteCSVString(ticker, interval, period)
 			if err != nil {
 				return
 			}

@@ -12,15 +12,29 @@ func aaplList(n int) []string {
 	return aapl_list
 }
 
-func BenchmarkGetQuoteJSON(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		GetQuoteJSON("AAPL", IntervalOneDay, PeriodOneDay)
+func TestGetQuote(t *testing.T) {
+	quote, err := GetQuote("AAPL", IntervalOneDay, PeriodOneDay)
+	if err != nil {
+		t.Error(err)
+	}
+	if quote.Ticker != "AAPL" {
+		t.Error("Ticker is not AAPL")
 	}
 }
 
-func BenchmarkGetQuoteJSONNetHTTP(b *testing.B) {
+func TestGetQuoteBatch(t *testing.T) {
+	quotes, err := GetQuoteBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(quotes) != 10 {
+		t.Error("Quotes length is not 10")
+	}
+}
+
+func BenchmarkGetQuoteJSON(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteJSONNetHTTP("AAPL", IntervalOneDay, PeriodOneDay)
+		GetQuoteJSON("AAPL", IntervalOneDay, PeriodOneDay)
 	}
 }
 
@@ -30,15 +44,6 @@ func BenchmarkGetQuoteJSONBatch(b *testing.B) {
 	b.StartTimer()
 	for n := 0; n < b.N; n++ {
 		GetQuoteJSONBatch(aaplist, IntervalOneDay, PeriodOneDay)
-	}
-}
-
-func BenchmarkGetQuoteJSONNetHTTPBatch(b *testing.B) {
-	b.StopTimer()
-	aaplist := aaplList(10)
-	b.StartTimer()
-	for n := 0; n < b.N; n++ {
-		GetQuoteJSONNetHTTPBatch(aaplist, IntervalOneDay, PeriodOneDay)
 	}
 }
 
@@ -68,12 +73,12 @@ func BenchmarkGetQuoteBatch(b *testing.B) {
 
 func BenchmarkGetQuoteCSV(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteCSV("AAPL", IntervalOneDay, PeriodOneDay)
+		GetQuoteCSVString("AAPL", IntervalOneDay, PeriodOneDay)
 	}
 }
 
 func BenchmarkGetQuoteCSVBatch(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteCSVBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+		GetQuoteCSVStringBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
 	}
 }
