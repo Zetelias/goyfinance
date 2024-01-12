@@ -13,7 +13,7 @@ import (
 // / Gets a unix timestamp for now and for `period` days/mo/years in the past
 // / The first timestamp returned is `period` days/mo/years ago and the second period is now
 func getUnixTimestamps(period Period) (int64, int64) {
-	var past_period time.Time
+	var pastPeriod time.Time
 	var now time.Time
 
 	now = time.Now()
@@ -21,54 +21,54 @@ func getUnixTimestamps(period Period) (int64, int64) {
 	case PeriodOneDay:
 		// Subtract 1 day from now
 		// The pattern is the same for all cases
-		past_period = now.AddDate(0, 0, -1)
+		pastPeriod = now.AddDate(0, 0, -1)
 	case PeriodFiveDays:
-		past_period = now.AddDate(0, 0, -5)
+		pastPeriod = now.AddDate(0, 0, -5)
 	case PeriodOneMonth:
-		past_period = now.AddDate(0, -1, 0)
+		pastPeriod = now.AddDate(0, -1, 0)
 	case PeriodThreeMonth:
-		past_period = now.AddDate(0, -3, 0)
+		pastPeriod = now.AddDate(0, -3, 0)
 	case PeriodSixMonth:
-		past_period = now.AddDate(0, -6, 0)
+		pastPeriod = now.AddDate(0, -6, 0)
 	case PeriodOneYear:
-		past_period = now.AddDate(-1, 0, 0)
+		pastPeriod = now.AddDate(-1, 0, 0)
 	case PeriodTwoYears:
-		past_period = now.AddDate(-2, 0, 0)
+		pastPeriod = now.AddDate(-2, 0, 0)
 	case PeriodFiveYear:
-		past_period = now.AddDate(-5, 0, 0)
+		pastPeriod = now.AddDate(-5, 0, 0)
 	case PeriodTenYears:
-		past_period = now.AddDate(-10, 0, 0)
+		pastPeriod = now.AddDate(-10, 0, 0)
 	case PeriodYtd:
-		past_period = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+		pastPeriod = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
 	default:
-		// Unreachable code but return 69, 420 because i'm so funny
+		// Unreachable code but return 69, 420 because I'm so funny
 		return 69, 420
 	}
 
 	// Convert the time.Time objects to unix timestamps
-	return past_period.Unix(), now.Unix()
+	return pastPeriod.Unix(), now.Unix()
 }
 
-func parseJSONToJSONQuote(json_data []byte) (JSONQuote, error) {
+func parseJSONToJSONQuote(jsonData []byte) (JSONQuote, error) {
 	var quote JSONQuote
-	err := json.Unmarshal(json_data, &quote)
+	err := json.Unmarshal(jsonData, &quote)
 	return quote, err
 }
 
-func parseJSONQuoteToQuote(json_quote JSONQuote, ticker string, period1 int64, period2 int64) (Quote, error) {
+func parseJSONQuoteToQuote(jsonQuote JSONQuote, ticker string, period1 int64, period2 int64) (Quote, error) {
 	var quote Quote
 	quote.Ticker = ticker
 	quote.PriceRangeStart = period1
 	quote.PriceRangeEnd = period2
-	quote.Interval = Interval(json_quote.Chart.Result[0].Meta.DataGranularity)
-	for i := 0; i < len(json_quote.Chart.Result[0].Timestamp); i++ {
-		var price_data PriceData
-		price_data.OpenPrice = json_quote.Chart.Result[0].Indicators.Quote[0].Open[i]
-		price_data.LowPrice = json_quote.Chart.Result[0].Indicators.Quote[0].Low[i]
-		price_data.HighPrice = json_quote.Chart.Result[0].Indicators.Quote[0].High[i]
-		price_data.ClosePrice = json_quote.Chart.Result[0].Indicators.Quote[0].Close[i]
-		price_data.Volume = json_quote.Chart.Result[0].Indicators.Quote[0].Volume[i]
-		quote.PriceHistoric = append(quote.PriceHistoric, price_data)
+	quote.Interval = Interval(jsonQuote.Chart.Result[0].Meta.DataGranularity)
+	for i := 0; i < len(jsonQuote.Chart.Result[0].Timestamp); i++ {
+		var priceData PriceData
+		priceData.OpenPrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].Open[i]
+		priceData.LowPrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].Low[i]
+		priceData.HighPrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].High[i]
+		priceData.ClosePrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].Close[i]
+		priceData.Volume = jsonQuote.Chart.Result[0].Indicators.Quote[0].Volume[i]
+		quote.PriceHistoric = append(quote.PriceHistoric, priceData)
 	}
 	return quote, nil
 }
@@ -79,7 +79,7 @@ func parseJSONQuoteToQuote(json_quote JSONQuote, ticker string, period1 int64, p
 // Yahoo Finance API into
 // a more usable format
 
-// An auto-generated struct
+// JSONQuote is an auto-generated struct
 // from https://mholt.github.io/json-to-go/
 // It is used to serve as a middle-stage
 // between the JSON data returned by the
@@ -148,7 +148,7 @@ type JSONQuote struct {
 	} `json:"chart"`
 }
 
-// One interval of price data
+// PriceData One interval of price data
 // for a ticker.
 // Contains OHLVC data
 type PriceData struct {
@@ -159,7 +159,7 @@ type PriceData struct {
 	Volume     int
 }
 
-// A single quote for a ticker
+// Quote is a single quote for a ticker
 // Contains the ticker, the
 // price range, the interval
 // and the price data

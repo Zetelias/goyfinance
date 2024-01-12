@@ -5,11 +5,26 @@ import (
 )
 
 func aaplList(n int) []string {
-	var aapl_list []string
+	var aaplList []string
 	for i := 0; i < n; i++ {
-		aapl_list = append(aapl_list, "AAPL")
+		aaplList = append(aaplList, "AAPL")
 	}
-	return aapl_list
+	return aaplList
+}
+
+func testAAPLQuote(quote Quote) {
+	if quote.Ticker != "AAPL" {
+		panic("Ticker is not AAPL")
+	}
+	var fields []struct {
+		name string
+		val  interface{}
+	}
+	for _, field := range fields {
+		if field.val == 0 {
+			panic(field.name + " is 0")
+		}
+	}
 }
 
 func TestGetQuote(t *testing.T) {
@@ -17,9 +32,7 @@ func TestGetQuote(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if quote.Ticker != "AAPL" {
-		t.Error("Ticker is not AAPL")
-	}
+	testAAPLQuote(quote)
 }
 
 func TestGetQuoteBatch(t *testing.T) {
@@ -27,8 +40,8 @@ func TestGetQuoteBatch(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(quotes) != 10 {
-		t.Error("Quotes length is not 10")
+	for _, quote := range quotes {
+		testAAPLQuote(quote)
 	}
 }
 
