@@ -41,7 +41,7 @@ func getUnixTimestamps(period Period) (int64, int64) {
 	case PeriodYtd:
 		past_period = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
 	default:
-		// Unreachable code but return 69, 420 because i'm so funny
+		// Unreachable code but return 69, 420 because I'm so funny
 		return 69, 420
 	}
 
@@ -53,6 +53,15 @@ func parseJSONToJSONQuote(jsonData []byte) (JSONQuote, error) {
 	var quote JSONQuote
 	err := json.Unmarshal(jsonData, &quote)
 	return quote, err
+}
+
+func parseJSONtoQuote(jsonData []byte, ticker string, period1 int64, period2 int64) (Quote, error) {
+	var jsonQuote JSONQuote
+	err := json.Unmarshal(jsonData, &jsonQuote)
+	if err != nil {
+		return Quote{}, err
+	}
+	return parseJSONQuoteToQuote(jsonQuote, ticker, period1, period2)
 }
 
 func parseJSONQuoteToQuote(jsonQuote JSONQuote, ticker string, period1 int64, period2 int64) (Quote, error) {

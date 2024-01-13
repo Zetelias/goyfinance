@@ -114,12 +114,12 @@ func GetQuote(ticker string, interval Interval, period Period) (Quote, error) {
 		return Quote{}, err
 	}
 
-	json_quote, err := parseJSONToJSONQuote(resp.Body())
+	quote, err := parseJSONtoQuote(resp.Body(), ticker, period1, period2)
 	if err != nil {
 		return Quote{}, err
 	}
 
-	return parseJSONQuoteToQuote(json_quote, ticker, period1, period2)
+	return quote, nil
 }
 
 // GetQuoteBatch returns a slice of Quote structs from Yahoo Finance.
@@ -145,7 +145,7 @@ func GetQuoteBatch(tickers []string, interval Interval, period Period) ([]Quote,
 	return res, nil
 }
 
-// GetQuoteCSVString returns a CSV string with OHLVC data from Yahoo Finance.
+// GetQuoteCSVString returns a CSV string with OHLCV data from Yahoo Finance.
 // If an error occurs, the CSV string will be empty.
 func GetQuoteCSVString(ticker string, interval Interval, period Period) (string, error) {
 	req := fasthttp.AcquireRequest()
@@ -166,7 +166,7 @@ func GetQuoteCSVString(ticker string, interval Interval, period Period) (string,
 	return string(resp.Body()), nil
 }
 
-// GetQuoteCSVStringBatch returns a slice of CSV strings with OHLVC data from Yahoo Finance.
+// GetQuoteCSVStringBatch returns a slice of CSV strings with OHLCV data from Yahoo Finance.
 // The order of the slice is the same as the order of the tickers slice.
 // If an error occurs, the CSV string will be empty.
 func GetQuoteCSVStringBatch(tickers []string, interval Interval, period Period) ([]string, error) {

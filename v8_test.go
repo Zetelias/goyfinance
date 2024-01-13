@@ -1,6 +1,7 @@
 package goyfinance
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -76,9 +77,28 @@ func TestContinuousPriceUpdater(t *testing.T) {
 	wg.Wait()
 }
 
+func TestExampleUsage(t *testing.T) {
+	// Define a bunch of tickers
+	tickerList := []string{"AAPL", "MSFT", "GOOG", "TSLA", "AMZN"}
+
+	// Get quote data for all the tickers
+	quotes, err := GetQuoteBatch(tickerList, IntervalOneDay, PeriodOneDay)
+
+	// Check for errors
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Use the quotes
+	fmt.Printf("The price of %s is %f\n", quotes[0].Ticker, quotes[0].PriceHistoric[len(quotes[0].PriceHistoric)-1].ClosePrice)
+}
+
 func BenchmarkGetQuoteJSON(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteJSON("AAPL", IntervalOneDay, PeriodOneDay)
+		_, err := GetQuoteJSON("AAPL", IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
@@ -87,42 +107,63 @@ func BenchmarkGetQuoteJSONBatch(b *testing.B) {
 	aaplist := aaplList(10)
 	b.StartTimer()
 	for n := 0; n < b.N; n++ {
-		GetQuoteJSONBatch(aaplist, IntervalOneDay, PeriodOneDay)
+		_, err := GetQuoteJSONBatch(aaplist, IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
 func BenchmarkGetQuoteJSONString(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteJSONString("AAPL", IntervalOneDay, PeriodOneDay)
+		_, err := GetQuoteJSONString("AAPL", IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
 func BenchmarkGetQuoteJSONStringBatch(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteJSONStringBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+		_, err := GetQuoteJSONStringBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
 func BenchmarkGetQuote(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuote("AAPL", IntervalOneDay, PeriodOneDay)
+		_, err := GetQuote("AAPL", IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
 func BenchmarkGetQuoteBatch(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+		_, err := GetQuoteBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
-func BenchmarkGetQuoteCSV(b *testing.B) {
+func BenchmarkGetQuoteCSVString(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteCSVString("AAPL", IntervalOneDay, PeriodOneDay)
+		_, err := GetQuoteCSVString("AAPL", IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
-func BenchmarkGetQuoteCSVBatch(b *testing.B) {
+func BenchmarkGetQuoteCSVStringBatch(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GetQuoteCSVStringBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+		_, err := GetQuoteCSVStringBatch(aaplList(10), IntervalOneDay, PeriodOneDay)
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
