@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"github.com/valyala/fasthttp"
 	"sync"
+	"time"
 )
 
-// GetQuoteJSONString returns a JSON string from Yahoo Finance
-// If an error occurs, the JSON string will be empty
+// GetQuoteJSONString returns a JSON string from Yahoo Finance.
+// If an error occurs, the JSON string will be empty.
 func GetQuoteJSONString(ticker string, interval Interval, period Period) (string, error) {
 	req := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(req)
 	period1, period2 := getUnixTimestamps(period)
 
 	req.SetRequestURI(fmt.Sprintf("https://query1.finance.yahoo.com/v8/finance/chart/%s?interval=%s&period1=%d&period2=%d", ticker, interval, period1, period2))
@@ -27,9 +29,9 @@ func GetQuoteJSONString(ticker string, interval Interval, period Period) (string
 	return string(resp.Body()), nil
 }
 
-// GetQuoteJSONStringBatch returns a slice of JSON strings from Yahoo Finance
-// The order of the slice is the same as the order of the tickers slice
-// If an error occurs, the JSON string will be empty
+// GetQuoteJSONStringBatch returns a slice of JSON strings from Yahoo Finance.
+// The order of the slice is the same as the order of the tickers slice.
+// If an error occurs, the JSON string will be empty.
 func GetQuoteJSONStringBatch(tickers []string, interval Interval, period Period) ([]string, error) {
 	var wg sync.WaitGroup
 	var res []string
@@ -48,8 +50,8 @@ func GetQuoteJSONStringBatch(tickers []string, interval Interval, period Period)
 	return res, nil
 }
 
-// GetQuoteJSON returns a JSONQuote struct from Yahoo Finance
-// If an error occurs, the JSONQuote struct will be empty
+// GetQuoteJSON returns a JSONQuote struct from Yahoo Finance.
+// If an error occurs, the JSONQuote struct will be empty.
 func GetQuoteJSON(ticker string, interval Interval, period Period) (JSONQuote, error) {
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -70,9 +72,9 @@ func GetQuoteJSON(ticker string, interval Interval, period Period) (JSONQuote, e
 	return parseJSONToJSONQuote(resp.Body())
 }
 
-// GetQuoteJSONBatch returns a slice of JSONQuote structs from Yahoo Finance
-// The order of the slice is the same as the order of the tickers slice
-// If an error occurs, the JSONQuote struct will be empty
+// GetQuoteJSONBatch returns a slice of JSONQuote structs from Yahoo Finance.
+// The order of the slice is the same as the order of the tickers slice.
+// If an error occurs, the JSONQuote struct will be empty.
 func GetQuoteJSONBatch(tickers []string, interval Interval, period Period) ([]JSONQuote, error) {
 	var wg sync.WaitGroup
 	var res []JSONQuote
@@ -91,10 +93,10 @@ func GetQuoteJSONBatch(tickers []string, interval Interval, period Period) ([]JS
 	return res, nil
 }
 
-// GetQuote returns a Quote struct from Yahoo Finance
-// If an error occurs, the Quote struct will be empty
-// This function is (surprisingly) around the same speed as GetQuoteJSON
-// and a tad faster than GetQuoteJSONString
+// GetQuote returns a Quote struct from Yahoo Finance.
+// If an error occurs, the Quote struct will be empty.
+// This function is (surprisingly) around the same speed as GetQuoteJSON.
+// and a tad faster than GetQuoteJSONString.
 func GetQuote(ticker string, interval Interval, period Period) (Quote, error) {
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -120,11 +122,11 @@ func GetQuote(ticker string, interval Interval, period Period) (Quote, error) {
 	return parseJSONQuoteToQuote(json_quote, ticker, period1, period2)
 }
 
-// GetQuoteBatch returns a slice of Quote structs from Yahoo Finance
-// The order of the slice is the same as the order of the tickers slice
-// If an error occurs, the Quote struct will be empty
-// This function is (surprisingly) around the same speed as GetQuoteJSONBatch
-// and a tad faster than GetQuoteJSONStringBatch
+// GetQuoteBatch returns a slice of Quote structs from Yahoo Finance.
+// The order of the slice is the same as the order of the tickers slice.
+// If an error occurs, the Quote struct will be empty.
+// This function is (surprisingly) around the same speed as GetQuoteJSONBatch.
+// and a tad faster than GetQuoteJSONStringBatch.
 func GetQuoteBatch(tickers []string, interval Interval, period Period) ([]Quote, error) {
 	var wg sync.WaitGroup
 	var res []Quote
@@ -143,8 +145,8 @@ func GetQuoteBatch(tickers []string, interval Interval, period Period) ([]Quote,
 	return res, nil
 }
 
-// GetQuoteCSVString returns a CSV string with OHLVC data from Yahoo Finance
-// If an error occurs, the CSV string will be empty
+// GetQuoteCSVString returns a CSV string with OHLVC data from Yahoo Finance.
+// If an error occurs, the CSV string will be empty.
 func GetQuoteCSVString(ticker string, interval Interval, period Period) (string, error) {
 	req := fasthttp.AcquireRequest()
 	period1, period2 := getUnixTimestamps(period)
@@ -164,9 +166,9 @@ func GetQuoteCSVString(ticker string, interval Interval, period Period) (string,
 	return string(resp.Body()), nil
 }
 
-// GetQuoteCSVStringBatch returns a slice of CSV strings with OHLVC data from Yahoo Finance
-// The order of the slice is the same as the order of the tickers slice
-// If an error occurs, the CSV string will be empty
+// GetQuoteCSVStringBatch returns a slice of CSV strings with OHLVC data from Yahoo Finance.
+// The order of the slice is the same as the order of the tickers slice.
+// If an error occurs, the CSV string will be empty.
 func GetQuoteCSVStringBatch(tickers []string, interval Interval, period Period) ([]string, error) {
 	var wg sync.WaitGroup
 	var res []string
@@ -183,4 +185,27 @@ func GetQuoteCSVStringBatch(tickers []string, interval Interval, period Period) 
 	}
 	wg.Wait()
 	return res, nil
+}
+
+// ContinuousPriceUpdater updates a channel with the latest price data.
+// The channel will be updated every updateIntervalSeconds seconds.
+// The stopSignal channel is used to stop the function.
+// The errorChannel is used to send errors to the caller.
+// The priceChannel is used to send the latest price data as a PriceData struct to the caller.
+// ticker, interval, period are used to fetch the price data from GetQuote.
+func ContinuousPriceUpdater(priceChannel chan PriceData, errorChannel chan error, ticker string, interval Interval, period Period, updateIntervalSeconds float64, stopSignal chan struct{}) {
+	for {
+		select {
+		case <-stopSignal:
+			return // We chose not to close all the channels because we don't know if they are used elsewhere
+		default:
+			price, err := GetQuote(ticker, interval, period)
+			if err != nil {
+				errorChannel <- err
+			} else if len(price.PriceHistoric) > 0 {
+				priceChannel <- price.PriceHistoric[len(price.PriceHistoric)-1]
+			}
+			time.Sleep(time.Duration(updateIntervalSeconds) * time.Second)
+		}
+	}
 }

@@ -79,12 +79,9 @@ func parseJSONQuoteToQuote(json_quote JSONQuote, ticker string, period1 int64, p
 // Yahoo Finance API into
 // a more usable format
 
-// An auto-generated struct
-// from https://mholt.github.io/json-to-go/
-// It is used to serve as a middle-stage
-// between the JSON data returned by the
-// Yahoo Finance API and the Quote struct
-// defined below
+// An auto-generated struct from https://mholt.github.io/json-to-go/
+// Although it was made as a middle between the JSON data and the Quote struct,
+// you could use it yourself because it's more complete than the Quote struct.
 type JSONQuote struct {
 	Chart struct {
 		Result []struct {

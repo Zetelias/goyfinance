@@ -1,7 +1,9 @@
 package goyfinance
 
 import (
+	"sync"
 	"testing"
+	"time"
 )
 
 func aaplList(n int) []string {
@@ -30,6 +32,35 @@ func TestGetQuoteBatch(t *testing.T) {
 	if len(quotes) != 10 {
 		t.Error("Quotes length is not 10")
 	}
+}
+
+func TestContinuousPriceUpdater(t *testing.T) {
+	priceChannel := make(chan PriceData)
+	errorChannel := make(chan error)
+	stopSignal := make(chan struct{})
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		ContinuousPriceUpdater(priceChannel, errorChannel, "AAPL", IntervalOneDay, PeriodOneDay, 1, stopSignal)
+	}()
+
+	select {
+	case val := <-priceChannel:
+		if val.ClosePrice == 0 || val.OpenPrice == 0 || val.HighPrice == 0 || val.LowPrice == 0 || val.Volume == 0 {
+			t.Error("Price data is 0")
+		}
+	case err := <-errorChannel:
+		t.Errorf("Received an error: %v", err)
+	case <-time.After(5 * time.Second): // Adjust the timeout as needed
+		t.Error("Timeout: Test did not complete within the expected time")
+	}
+
+	stopSignal <- struct{}{}
+
+	wg.Wait()
 }
 
 func BenchmarkGetQuoteJSON(b *testing.B) {
