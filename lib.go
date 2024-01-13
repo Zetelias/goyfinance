@@ -49,26 +49,26 @@ func getUnixTimestamps(period Period) (int64, int64) {
 	return past_period.Unix(), now.Unix()
 }
 
-func parseJSONToJSONQuote(json_data []byte) (JSONQuote, error) {
+func parseJSONToJSONQuote(jsonData []byte) (JSONQuote, error) {
 	var quote JSONQuote
-	err := json.Unmarshal(json_data, &quote)
+	err := json.Unmarshal(jsonData, &quote)
 	return quote, err
 }
 
-func parseJSONQuoteToQuote(json_quote JSONQuote, ticker string, period1 int64, period2 int64) (Quote, error) {
+func parseJSONQuoteToQuote(jsonQuote JSONQuote, ticker string, period1 int64, period2 int64) (Quote, error) {
 	var quote Quote
 	quote.Ticker = ticker
 	quote.PriceRangeStart = period1
 	quote.PriceRangeEnd = period2
-	quote.Interval = Interval(json_quote.Chart.Result[0].Meta.DataGranularity)
-	for i := 0; i < len(json_quote.Chart.Result[0].Timestamp); i++ {
-		var price_data PriceData
-		price_data.OpenPrice = json_quote.Chart.Result[0].Indicators.Quote[0].Open[i]
-		price_data.LowPrice = json_quote.Chart.Result[0].Indicators.Quote[0].Low[i]
-		price_data.HighPrice = json_quote.Chart.Result[0].Indicators.Quote[0].High[i]
-		price_data.ClosePrice = json_quote.Chart.Result[0].Indicators.Quote[0].Close[i]
-		price_data.Volume = json_quote.Chart.Result[0].Indicators.Quote[0].Volume[i]
-		quote.PriceHistoric = append(quote.PriceHistoric, price_data)
+	quote.Interval = Interval(jsonQuote.Chart.Result[0].Meta.DataGranularity)
+	for i := 0; i < len(jsonQuote.Chart.Result[0].Timestamp); i++ {
+		var priceData PriceData
+		priceData.OpenPrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].Open[i]
+		priceData.LowPrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].Low[i]
+		priceData.HighPrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].High[i]
+		priceData.ClosePrice = jsonQuote.Chart.Result[0].Indicators.Quote[0].Close[i]
+		priceData.Volume = jsonQuote.Chart.Result[0].Indicators.Quote[0].Volume[i]
+		quote.PriceHistoric = append(quote.PriceHistoric, priceData)
 	}
 	return quote, nil
 }

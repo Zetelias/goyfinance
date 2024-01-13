@@ -114,12 +114,12 @@ func GetQuote(ticker string, interval Interval, period Period) (Quote, error) {
 		return Quote{}, err
 	}
 
-	jsonQuote, err := parseJSONToJSONQuote(resp.Body())
+	json_quote, err := parseJSONToJSONQuote(resp.Body())
 	if err != nil {
 		return Quote{}, err
 	}
 
-	return parseJSONQuoteToQuote(jsonQuote, ticker, period1, period2)
+	return parseJSONQuoteToQuote(json_quote, ticker, period1, period2)
 }
 
 // GetQuoteBatch returns a slice of Quote structs from Yahoo Finance.
