@@ -82,7 +82,7 @@ func TestExampleUsage(t *testing.T) {
 	tickerList := []string{"AAPL", "MSFT", "GOOG", "TSLA", "AMZN"}
 
 	// Get quote data for all the tickers
-	quotes, err := GetQuoteBatch(tickerList, IntervalOneDay, PeriodOneDay)
+	quotes, err := GetQuoteBatch(tickerList, IntervalOneDay, PeriodFiveDays)
 
 	// Check for errors
 	if err != nil {
@@ -90,7 +90,8 @@ func TestExampleUsage(t *testing.T) {
 	}
 
 	// Use the quotes
-	fmt.Printf("The price of %s is %f\n", quotes[0].Ticker, quotes[0].PriceHistoric[len(quotes[0].PriceHistoric)-1].ClosePrice)
+	fmt.Printf("Three days ago, %s closed at $%.2f\n", quotes[0].Ticker, quotes[0].PriceHistoric[2].ClosePrice)
+	fmt.Printf("Now, the volume of %s is %d\n", quotes[1].Ticker, quotes[1].PriceHistoric[0].Volume)
 }
 
 func BenchmarkGetQuoteJSON(b *testing.B) {
