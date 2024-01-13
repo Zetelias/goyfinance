@@ -1,4 +1,4 @@
-module goyfinance
+module github.com/Zetelias/goyfinance
 
 go 1.21
 
