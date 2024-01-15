@@ -1,7 +1,7 @@
 package goyfinance
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"time"
 )
 
@@ -13,51 +13,47 @@ import (
 // / Gets a unix timestamp for now and for `period` days/mo/years in the past
 // / The first timestamp returned is `period` days/mo/years ago and the second period is now
 func getUnixTimestamps(period Period) (int64, int64) {
-	var past_period time.Time
+	var pastPeriod time.Time
 	var now time.Time
 
 	now = time.Now()
 	switch period {
-	case PeriodOneDay:
-		// Subtract 1 day from now
-		// The pattern is the same for all cases
-		past_period = now.AddDate(0, 0, -1)
 	case PeriodFiveDays:
-		past_period = now.AddDate(0, 0, -5)
+		pastPeriod = now.AddDate(0, 0, -5)
 	case PeriodOneMonth:
-		past_period = now.AddDate(0, -1, 0)
+		pastPeriod = now.AddDate(0, -1, 0)
 	case PeriodThreeMonth:
-		past_period = now.AddDate(0, -3, 0)
+		pastPeriod = now.AddDate(0, -3, 0)
 	case PeriodSixMonth:
-		past_period = now.AddDate(0, -6, 0)
+		pastPeriod = now.AddDate(0, -6, 0)
 	case PeriodOneYear:
-		past_period = now.AddDate(-1, 0, 0)
+		pastPeriod = now.AddDate(-1, 0, 0)
 	case PeriodTwoYears:
-		past_period = now.AddDate(-2, 0, 0)
+		pastPeriod = now.AddDate(-2, 0, 0)
 	case PeriodFiveYear:
-		past_period = now.AddDate(-5, 0, 0)
+		pastPeriod = now.AddDate(-5, 0, 0)
 	case PeriodTenYears:
-		past_period = now.AddDate(-10, 0, 0)
+		pastPeriod = now.AddDate(-10, 0, 0)
 	case PeriodYtd:
-		past_period = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+		pastPeriod = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
 	default:
 		// Unreachable code but return 69, 420 because I'm so funny
 		return 69, 420
 	}
 
 	// Convert the time.Time objects to unix timestamps
-	return past_period.Unix(), now.Unix()
+	return pastPeriod.Unix(), now.Unix()
 }
 
 func parseJSONToJSONQuote(jsonData []byte) (JSONQuote, error) {
 	var quote JSONQuote
-	err := json.Unmarshal(jsonData, &quote)
+	err := easyjson.Unmarshal(jsonData, &quote)
 	return quote, err
 }
 
 func parseJSONtoQuote(jsonData []byte, ticker string, period1 int64, period2 int64) (Quote, error) {
 	var jsonQuote JSONQuote
-	err := json.Unmarshal(jsonData, &jsonQuote)
+	err := easyjson.Unmarshal(jsonData, &jsonQuote)
 	if err != nil {
 		return Quote{}, err
 	}
@@ -165,7 +161,7 @@ type PriceData struct {
 	Volume     int
 }
 
-// A single quote for a ticker
+// Quote is a single quote for a ticker
 // Contains the ticker, the
 // price range, the interval
 // and the price data
@@ -207,7 +203,6 @@ const (
 type Period string
 
 const (
-	PeriodOneDay     Period = "1d"
 	PeriodFiveDays   Period = "5d"
 	PeriodOneMonth   Period = "1mo"
 	PeriodThreeMonth Period = "3mo"
