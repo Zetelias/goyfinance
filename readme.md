@@ -18,6 +18,13 @@ Benchmarks against other libraries are coming soon.
 
 ## Example and usage
 ```go
+package main
+
+import (
+    "fmt"
+    "github.com/Zetelias/goyfinance"
+)
+
 func main() {
 	// Define a bunch of tickers, which are the ones found on Yahoo Finance.
 	tickers := []string{"AAPL", "TSLA", "MSFT", "GOOG", "AMZN"}
