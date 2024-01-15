@@ -12,8 +12,6 @@ You can use it to get one, or multiple quotes at once.
 You can also create a channel that will send you price data with an interval of your choice.
 
 ## Benchmarks
-The benchmarks are done on a Windows 10 machine with an Intel i9-10900K CPU.
-For results see the `benchmarking/v8_test_bench_output.md` file.
 Benchmarks against other libraries are coming soon.
 
 ## Example and usage
@@ -66,3 +64,15 @@ func main() {
 	fmt.Printf("Average volume of batch quotes is %d\n", averageVolume)
 }
 ```
+
+## Disclaimer
+This uses the free, undocumented Yahoo Finance API which while being free, is not guaranteed to be stable.
+The Yahoo Finance API should not be used for commercial purposes,
+or for real time data.
+
+## Contributing
+Make yer PR's, issues and I'll very probably address them
+if they do not break the code and the ethos of speed and simplicity.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
