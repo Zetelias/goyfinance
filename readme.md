@@ -1,4 +1,4 @@
-# A fast library useful to get data from yahoo finance in Go
+# Yahoo finance API in Golang. Fast and simple.
     
 ## Installation
 ```bash
