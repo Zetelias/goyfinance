@@ -193,6 +193,8 @@ func GetQuoteCSVStringBatch(tickers []string, interval Interval, period Period) 
 // The errorChannel is used to send errors to the caller.
 // The priceChannel is used to send the latest price data as a PriceData struct to the caller.
 // ticker, interval, period are used to fetch the price data from GetQuote.
+// Note: It runs forever, so you should probably run it in a goroutine.
+// Note: Sending the stopSignal channel will not close the channels.
 func ContinuousPriceUpdater(priceChannel chan PriceData, errorChannel chan error, ticker string, interval Interval, period Period, updateIntervalSeconds float64, stopSignal chan struct{}) {
 	for {
 		select {

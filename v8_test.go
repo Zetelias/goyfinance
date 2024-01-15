@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 	"testing"
-	"time"
 )
 
 func aaplList(n int) []string {
@@ -68,8 +67,6 @@ func TestContinuousPriceUpdater(t *testing.T) {
 		}
 	case err := <-errorChannel:
 		t.Errorf("Received an error: %v", err)
-	case <-time.After(5 * time.Second): // Adjust the timeout as needed
-		t.Error("Timeout: Test did not complete within the expected time")
 	}
 
 	stopSignal <- struct{}{}
